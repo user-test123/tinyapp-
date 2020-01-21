@@ -87,12 +87,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
   let longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[req.params.id] = longURL;
 
-  console.log(urlDatabase[req.params.shortURL]);
+  console.log(urlDatabase[req.params.id]);
   // expected output: "wwww.lighthouse.com"
 
-  res.redirect("/urls/" + id); // Respond with 'Ok' (we will replace this)
+  res.redirect("/urls/"); // Respond with 'Ok' (we will replace this)
 });
 
 function generateRandomString() {
