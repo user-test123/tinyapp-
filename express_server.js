@@ -45,13 +45,61 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+app.get("/u/:shortURL", (req, res) => {
+  // const longURL = ...
+  //get shortURL from request
+  //use shortURL to retrieve the asscoaited long url
+  //redirect user to website of longURL
+
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+  res.redirect(longURL);
 });
 
+app.post("/urls", (req, res) => {
+  let longURL = req.body.longURL;
+  let shortURL = generateRandomString();
+  // console.log(req.body.longURL); // Log the POST request body to the console
+  console.log(longURL);
+  console.log(shortURL);
+  urlDatabase[shortURL] = longURL;
+  console.log(urlDatabase);
+  res.redirect("urls/" + shortURL); // Respond with 'Ok' (we will replace this)
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+
+  console.log(urlDatabase[req.params.shortURL]);
+  // expected output: "wwww.lighthouse.com"
+
+  res.redirect("/urls/"); // Respond with 'Ok' (we will replace this)
+});
+
+app.post("/urls/:shortURL/edit", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+
+  console.log(urlDatabase[req.params.shortURL]);
+  // expected output: "wwww.lighthouse.com"
+
+  res.redirect("/urls/"); // Respond with 'Ok' (we will replace this)
+});
+
+// app.post("/urls/:shortURL/delete", (req, res) => {
+//   // delete urlDatabase["b2xVn2"];
+//   delete urlDatabase["9sm5xK"];
+//   // delete req.params.shortURL;
+
+//   console.log(urlDatabase["9sm5xK"]);
+//   // expected output: "wwww.google.com"
+
+//   res.redirect("/urls/"); // Respond with 'Ok' (we will replace this)
+// });
+
 function generateRandomString() {
-  Math.random()
+  let randomString = Math.random()
     .toString(36)
     .substring(2, 8);
+
+  return randomString;
 }
