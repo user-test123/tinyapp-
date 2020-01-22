@@ -2,8 +2,11 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cookieParser());
 
 app.set("view engine", "ejs");
 
@@ -29,18 +32,24 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { urls: urlDatabase, username: req.cookies["login"] };
+  console.log(req.cookies["login"]);
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    username: req.cookies["login"]
+  };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  console.log(req);
   let templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL] /* What goes here? */
+    longURL: urlDatabase[req.params.shortURL] /* What goes here? */,
+    username: req.cookies["login"]
   };
   res.render("urls_show", templateVars);
 });
@@ -89,10 +98,23 @@ app.post("/urls/:id", (req, res) => {
   let longURL = req.body.longURL;
   urlDatabase[req.params.id] = longURL;
 
-  console.log(urlDatabase[req.params.id]);
+  // console.log(urlDatabase[req.params.id]);
   // expected output: "wwww.lighthouse.com"
 
   res.redirect("/urls/"); // Respond with 'Ok' (we will replace this)
+});
+
+app.post("/login", (req, res) => {
+  // console.log(req.body.username);
+
+  res.cookie("login", req.body.username);
+  res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {
+  console.log("logout test");
+  res.clearCookie("login");
+  res.redirect("/urls");
 });
 
 function generateRandomString() {
