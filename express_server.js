@@ -25,8 +25,12 @@ const users = {
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  // b2xVn2: "http://www.lighthouselabs.ca",
+  // "9sm5xK": "http://www.google.com"
+
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
+  kfTft4: { longURL: "https://www.reddit.com", userID: "4safse" }
 };
 
 app.get("/", (req, res) => {
@@ -46,29 +50,39 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  // console.log("****");
-  console.log(users);
+  // console.log(urlDatabase);
+
+  // console.log(users);
   let username = undefined;
-  if (req.cookies["user_id"] !== "undefined") {
+  if (req.cookies["user_id"]) {
     username = req.cookies["user_id"];
+  } else {
+    res.redirect("/login");
+    return;
   }
+
   let templateVars = {
-    urls: urlDatabase,
-    id: undefined,
+    urls: urlsForUser(req.cookies.user_id),
+    // id: undefined,
 
     username
   };
+
   // console.log(typeof req.cookies["user_id"]);
   // console.log(req.cookies["user_id"] === undeffined);
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    username: req.cookies["login"],
-    email: req.cookies["login"]
-  };
-  res.render("urls_new", templateVars);
+  if (!req.cookies["user_id"]) {
+    res.redirect("/login");
+  } else {
+    let templateVars = {
+      username: req.cookies["login"],
+      email: req.cookies["login"]
+    };
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -76,7 +90,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL] /* What goes here? */,
-    username: req.cookies["login"]
+    username: req.cookies["user_id"]
   };
   res.render("urls_show", templateVars);
 });
@@ -88,12 +102,12 @@ app.get("/u/:shortURL", (req, res) => {
   //redirect user to website of longURL
 
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
-  res.redirect(longURL);
+  const longURL = urlDatabase[shortURL].longURL;
+  res.redirect("/longURL");
 });
 
 app.get("/register", (req, res) => {
-  console.log(users);
+  // console.log(users);
   let templateVars = {
     username: undefined
   };
@@ -102,7 +116,7 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  console.log(users);
+  // console.log(users);
   let templateVars = {
     username: undefined
   };
@@ -113,11 +127,13 @@ app.get("/login", (req, res) => {
 app.post("/urls", (req, res) => {
   let longURL = req.body.longURL;
   let shortURL = generateRandomString();
+
   // console.log(req.body.longURL); // Log the POST request body to the console
-  console.log(longURL);
+  // console.log(longURL);
+  // console.log(shortURL);
+  urlDatabase[shortURL] = { longURL, userID: req.cookies.user_id };
   console.log(shortURL);
-  urlDatabase[shortURL] = longURL;
-  console.log(urlDatabase);
+  // console.log(urlDatabase);
   res.redirect("urls/" + shortURL); // Respond with 'Ok' (we will replace this)
 });
 
@@ -130,18 +146,18 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls/"); // Respond with 'Ok' (we will replace this)
 });
 
-// app.post("/urls/:shortURL/edit", (req, res) => {
-//   delete urlDatabase[req.params.shortURL];
+app.post("/urls/:shortURL/edit", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
 
-//   // console.log(urlDatabase[req.params.shortURL]);
-//   // expected output: "wwww.lighthouse.com"
+  // console.log(urlDatabase[req.params.shortURL]);
+  // expected output: "wwww.lighthouse.com"
 
-//   res.redirect("/urls/"); // Respond with 'Ok' (we will replace this)
-// });
+  res.redirect("/urls/"); // Respond with 'Ok' (we will replace this)
+});
 
 app.post("/urls/:id", (req, res) => {
   let longURL = req.body.longURL;
-  urlDatabase[req.params.id] = longURL;
+  urlDatabase[req.params.id].longURL = longURL;
 
   // console.log(urlDatabase[req.params.id]);
   // expected output: "wwww.lighthouse.com"
@@ -191,18 +207,10 @@ app.post("/login", (req, res) => {
   // console.log(req.body.username);
   console.log(users);
 
-  // if (
-  //   lookuppasswordwithEmail(req.body.email, users, req.body.password) ===
-  //   req.body.password
-  // ) {
-  //   res.cookie("user_id", req.body.email);
-  //   res.redirect("/urls");
-  // }
-
   console.log("line 215 ---> ", lookupEmail(users, req.body.email));
   if (req.body.email === "" || req.body.password === "") {
     res.statusCode = 403;
-    res.end("Status code 403 (user with e-mail cannot be found)");
+    res.end("Status code 403 (both the e-mail and password cannot be found)");
   } else {
     const user = lookupEmail(users, req.body.email);
     if (!user) {
@@ -281,3 +289,20 @@ function lookupEmail(users, email) {
   }
   return false;
 }
+
+function urlsForUser(id) {
+  const result = {};
+  for (const updatedObj in urlDatabase) {
+    if (urlDatabase[updatedObj].userID === id) {
+      // ADD THE ENTIRE URLS OBJECT (urlDatabase[updatedObj]) INTO result
+
+      result[updatedObj] = urlDatabase[updatedObj];
+    }
+    // console.log(urlDatabase[updatedObj]);
+  }
+
+  console.log(result);
+  return result;
+}
+
+urlsForUser("aJ48lW");
