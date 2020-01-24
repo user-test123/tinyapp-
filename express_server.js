@@ -4,10 +4,18 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
+var cookieSession = require("cookie-session");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
+
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["key1", "key2"]
+  })
+);
 
 const users = {
   userRandomID: {
@@ -55,15 +63,15 @@ app.get("/urls", (req, res) => {
 
   // console.log(users);
   let username = undefined;
-  if (req.cookies["user_id"]) {
-    username = req.cookies["user_id"];
+  if (req.session.user_id) {
+    username = req.session.user_id;
   } else {
     res.redirect("/login");
     return;
   }
 
   let templateVars = {
-    urls: urlsForUser(req.cookies.user_id),
+    urls: urlsForUser(req.session.user_id),
     // id: undefined,
 
     username
@@ -75,12 +83,12 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies["user_id"]) {
+  if (!req.session.user_id) {
     res.redirect("/login");
   } else {
     let templateVars = {
-      username: req.cookies["login"],
-      email: req.cookies["login"]
+      username: req.session.user_id,
+      email: req.session.user_id
     };
     res.render("urls_new", templateVars);
   }
@@ -91,7 +99,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL] /* What goes here? */,
-    username: req.cookies["user_id"]
+    username: req.session.user_id
   };
   res.render("urls_show", templateVars);
 });
@@ -135,7 +143,7 @@ app.post("/urls", (req, res) => {
   // console.log(req.body.longURL); // Log the POST request body to the console
   // console.log(longURL);
   // console.log(shortURL);
-  urlDatabase[shortURL] = { longURL, userID: req.cookies.user_id };
+  urlDatabase[shortURL] = { longURL, userID: req.session.user_id };
   console.log(shortURL);
   // console.log(urlDatabase);
   res.redirect("urls/" + shortURL); // Respond with 'Ok' (we will replace this)
@@ -171,7 +179,7 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/logout", (req, res) => {
   console.log("logout test");
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls");
 });
 
@@ -207,7 +215,7 @@ app.post("/register", (req, res) => {
   // console.log(req.body.password);
   // console.log("register test");
 
-  res.cookie("user_id", req.body.email);
+  req.session.user_id = req.body.email;
 
   res.redirect("/urls");
 });
@@ -227,7 +235,7 @@ app.post("/login", (req, res) => {
       res.end("User not found!");
     } else {
       if (bcrypt.compareSync(req.body.password, user.password)) {
-        res.cookie("user_id", user.id);
+        req.session.user_id = req.body.email;
         res.redirect("/urls");
       } else {
         res.statusCode = 403;
