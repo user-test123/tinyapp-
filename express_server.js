@@ -88,7 +88,7 @@ app.get("/urls/new", (req, res) => {
       username: req.session.user_id,
       email: req.session.user_id
     };
-    res.render("urls_new", templateVars);
+    res.render("urls_new", templateVars); //urls_new page is rendered when the endpoint of new is implemented in browser
   }
 });
 
@@ -99,7 +99,7 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[req.params.shortURL],
     username: req.session.user_id
   };
-  res.render("urls_show", templateVars);
+  res.render("urls_show", templateVars); //urls_show page is rendered when the endpoint of shortURL is implemented in browser
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -117,7 +117,7 @@ app.get("/register", (req, res) => {
     username: undefined
   };
 
-  res.render("user_registration", templateVars);
+  res.render("user_registration", templateVars); //user_registration page is rendered when the endpoint of register is implemented in browser
 });
 
 app.get("/login", (req, res) => {
@@ -126,7 +126,7 @@ app.get("/login", (req, res) => {
     username: undefined
   };
 
-  res.render("user_login", templateVars);
+  res.render("user_login", templateVars); //user_login page is rendered when the endpoint of register is implemented in browser
 });
 
 app.post("/urls", (req, res) => {
@@ -212,14 +212,14 @@ app.post("/login", (req, res) => {
     const user = lookupEmail(users, req.body.email);
     if (!user) {
       res.statusCode = 403;
-      res.end("User not found!");
+      res.end("User not found!"); //if user types in the wrong username in the login page, after an account has been registered the message "User not found!" is displayed"
     } else {
       if (bcrypt.compareSync(req.body.password, user.password)) {
         req.session.user_id = req.body.email;
         res.redirect("/urls");
       } else {
         res.statusCode = 403;
-        res.end("Password incorrect!");
+        res.end("Password incorrect!"); //if user inputs the wrong password in the login page, the message "Password incorrect!" is displayed"
       }
     }
   }
