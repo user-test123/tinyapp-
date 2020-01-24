@@ -20,6 +20,7 @@ app.use(
 );
 
 const users = {
+  //this is the database(object) that was used during the testing
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
@@ -175,10 +176,10 @@ app.post("/register", (req, res) => {
 
   if (email === "" && password === "") {
     res.statusCode = 400;
-    res.end("Status code 400 (fields are empty)");
+    res.end("Status code 400 (fields are empty)"); //when user registers error message shows up if email and password not inputted
   } else if (checkEmail(users, email)) {
     res.statusCode = 400;
-    res.end("Status code 400 (emails are inside object)");
+    res.end("Status code 400 (emails are inside object)"); //when user registers the same username and password that had previously been registered, this error message shows up
   }
 
   let randomID = generateRandomString();
@@ -207,7 +208,7 @@ app.post("/login", (req, res) => {
   console.log("line 215 ---> ", lookupEmail(users, req.body.email));
   if (req.body.email === "" || req.body.password === "") {
     res.statusCode = 403;
-    res.end("Status code 403 (both the e-mail and password cannot be found)");
+    res.end("Status code 403 (both the e-mail and password cannot be found)"); //if user does not type in a username and password in the login page, after an account has been registered the message "Status code 403 (both the e-mail and password cannot be found)" is displayed"
   } else {
     const user = lookupEmail(users, req.body.email);
     if (!user) {
@@ -234,6 +235,7 @@ function generateRandomString() {
 }
 
 function checkEmail(users, email) {
+  //function checkEmail is used to compare the email in users object with email inputted by the user.
   for (const objectKey of Object.keys(users)) {
     if (email === users[objectKey].email) {
       console.log("true");
@@ -244,6 +246,7 @@ function checkEmail(users, email) {
 }
 
 function lookupEmail(users, email) {
+  //function lookupEmail is used to compare the email in users object with email inputted by the user and returns email stored in object
   for (const objectKey of Object.keys(users)) {
     if (email === users[objectKey].email) {
       console.log("true");
