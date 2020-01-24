@@ -4,7 +4,9 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
-var cookieSession = require("cookie-session");
+const cookieSession = require("cookie-session");
+const { getUserByEmail } = require("./helpers");
+// const { lookupEmail } = require("./getUserByEmail");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -71,7 +73,7 @@ app.get("/urls", (req, res) => {
   }
 
   let templateVars = {
-    urls: urlsForUser(req.session.user_id),
+    urls: urlsForUser(req.session.user_id, urlDatabase),
     // id: undefined,
 
     username
@@ -334,3 +336,5 @@ function urlsForUser(id) {
 }
 
 urlsForUser("aJ48lW");
+
+getUserByEmail();
