@@ -8,7 +8,7 @@ const getUserByEmail = function(email, database) {
       return database[objectKey]; //returns email if it matches
     }
   }
-  return false; //returns fales if emails do not match
+  return false; //returns false if emails do not match
 };
 
 module.exports = { getUserByEmail };
