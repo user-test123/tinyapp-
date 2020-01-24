@@ -1,8 +1,8 @@
 const { assert } = require("chai");
-
 const { getUserByEmail } = require("../helpers.js");
 
 const testUsers = {
+  //the database that was used during testing
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
@@ -16,6 +16,7 @@ const testUsers = {
 };
 
 describe("getUserByEmail", function() {
+  //used "describe" function as well is "it" function to perform test cases
   it("should return a user with valid email", function() {
     const user = getUserByEmail("user@example.com", testUsers);
     const expectedOutput = "userRandomID";

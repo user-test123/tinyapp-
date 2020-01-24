@@ -20,7 +20,6 @@ app.use(
 );
 
 const users = {
-  //this is the database(object) that was used during the testing
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
