@@ -2,7 +2,7 @@ const getUserByEmail = function(email, database) {
   // lookup magic...
 
   for (const objectKey of Object.keys(database)) {
-    if (database === database[objectKey].email) {
+    if (email === database[objectKey].email) {
       console.log("true");
       return database[objectKey];
     }
