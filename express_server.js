@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcrypt");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -108,6 +109,9 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get("/register", (req, res) => {
   // console.log(users);
+  // const password = "purple-monkey-dinosaur";
+  // const hashedPassword = bcrypt.hashSync(password, 10);
+
   let templateVars = {
     username: undefined
   };
@@ -184,13 +188,18 @@ app.post("/register", (req, res) => {
 
   let randomID = generateRandomString();
 
-  let user = {
+  users[randomID] = {
     id: randomID,
     email: req.body.email,
-    password: req.body.password
+    password: undefined
   };
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
-  users[randomID] = user;
+  console.log(users[randomID]);
+  users[randomID].password = hashedPassword;
+  console.log(hashedPassword);
+
+  // users[randomID] = user;
 
   // console.log(users);
 
@@ -217,7 +226,7 @@ app.post("/login", (req, res) => {
       res.statusCode = 403;
       res.end("User not found!");
     } else {
-      if (user.password === req.body.password) {
+      if (bcrypt.compareSync(req.body.password, user.password)) {
         res.cookie("user_id", user.id);
         res.redirect("/urls");
       } else {
@@ -226,6 +235,17 @@ app.post("/login", (req, res) => {
       }
     }
   }
+
+  // let userid = "";
+  // for (const user of Object.keys(users)) {
+  //   if (users[user].email === req.body.email) {
+  //     userid = user;
+  //   }
+  // }
+
+  // console.log(req.body.password);
+  // console.log(users[userid].password);
+  // bcrypt.compareSync(req.body.password, users[userid].password);
 
   // } else if (user && user.password !== req.body.password) {
   //   res.statusCode = 403;
