@@ -121,12 +121,16 @@ app.get("/u/:shortURL", (req, res) => {
     return;
   }
 
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
-    username: req.session.user_id
-  };
-  res.render("urls_show", templateVars);
+  // let templateVars = {
+  // shortURL: req.params.shortURL;
+  //   longURL: urlDatabase[req.params.shortURL],
+  //   username: req.session.user_id
+  // };
+  longURL = urlDatabase[req.params.shortURL].longURL;
+  console.log(req.params);
+  console.log(urlDatabase[req.params.shortURL].longURL);
+  res.redirect(longURL);
+  return;
 });
 
 app.get("/register", (req, res) => {
