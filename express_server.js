@@ -42,7 +42,14 @@ const urlDatabase = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  // res.send("Hello you are at David He's Tiny App Project!");
+
+  if (!req.session.user_id) {
+    res.redirect("/login");
+  } else {
+    res.redirect("/urls"); //urls_new page is rendered when the endpoint of new is implemented in browser
+  }
+  // res.redirect("/login");
 });
 
 app.listen(PORT, () => {
@@ -94,6 +101,12 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   console.log(req);
+
+  if (!req.session.user_id) {
+    res.redirect("/login");
+    return;
+  }
+
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
@@ -103,16 +116,20 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
-  res.redirect("/longURL");
+  if (!req.session.user_id) {
+    res.redirect("/login");
+    return;
+  }
+
+  let templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    username: req.session.user_id
+  };
+  res.render("urls_show", templateVars);
 });
 
 app.get("/register", (req, res) => {
-  // console.log(users);
-  // const password = "purple-monkey-dinosaur";
-  // const hashedPassword = bcrypt.hashSync(password, 10);
-
   let templateVars = {
     username: undefined
   };
@@ -121,7 +138,6 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  // console.log(users);
   let templateVars = {
     username: undefined
   };
@@ -135,7 +151,7 @@ app.post("/urls", (req, res) => {
 
   urlDatabase[shortURL] = { longURL, userID: req.session.user_id };
   console.log(shortURL);
-  // console.log(urlDatabase);
+
   res.redirect("urls/" + shortURL); // Respond with 'Ok' (we will replace this)
 });
 
@@ -157,9 +173,6 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   let longURL = req.body.longURL;
   urlDatabase[req.params.id].longURL = longURL;
-
-  // console.log(urlDatabase[req.params.id]);
-  // expected output: "wwww.lighthouse.com"
 
   res.redirect("/urls/"); // Respond with 'Ok' (we will replace this)
 });
@@ -194,8 +207,6 @@ app.post("/register", (req, res) => {
   users[randomID].password = hashedPassword;
   console.log(hashedPassword);
 
-  // users[randomID] = user;
-
   req.session.user_id = req.body.email;
 
   res.redirect("/urls");
@@ -212,14 +223,18 @@ app.post("/login", (req, res) => {
     const user = lookupEmail(users, req.body.email);
     if (!user) {
       res.statusCode = 403;
-      res.end("User not found!"); //if user types in the wrong username in the login page, after an account has been registered the message "User not found!" is displayed"
+      res.end(
+        "Sorry we do not recognize this username. User not found! Please try again!"
+      ); //if user types in the wrong username in the login page, after an account has been registered the message "User not found!" is displayed"
     } else {
       if (bcrypt.compareSync(req.body.password, user.password)) {
         req.session.user_id = req.body.email;
         res.redirect("/urls");
       } else {
         res.statusCode = 403;
-        res.end("Password incorrect!"); //if user inputs the wrong password in the login page, the message "Password incorrect!" is displayed"
+        res.end(
+          "Invalide password, please try again. Password is case sensitive."
+        ); //if user inputs the wrong password in the login page, the message "Password incorrect!" is displayed"
       }
     }
   }
